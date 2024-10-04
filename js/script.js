@@ -17,6 +17,9 @@ $(document).ready(function () {
     // Crear una instancia del proveedor de Google
     const provider = new firebase.auth.GoogleAuthProvider();
 
+    // Crear una instancia del proveedor de facebook
+    const facebookProvider = new firebase.auth.FacebookAuthProvider();
+
     // Definir la URL del avatar provisional
     const defaultAvatar = "https://via.placeholder.com/100";
 
@@ -140,5 +143,19 @@ $(document).ready(function () {
             $('#userName').text('');
             $('#userAvatar').attr('src', defaultAvatar);
         }
+    });
+
+    $('#loginFacebookBtn').click(function(){
+        auth.signInWithPopup(facebookProvider)
+            .then(function(result){
+                console.log("Inicio de sesión con Facebook. ¡Bienvenido!");
+            })
+            .catch(function(error){
+                // Manejar errores de autenticación
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                console.error("Error al iniciar sesión con Google:", errorCode, errorMessage);
+                alert("Error al iniciar sesión con Google: " + errorMessage);
+            })
     });
 });
