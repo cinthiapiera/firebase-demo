@@ -154,8 +154,8 @@ $(document).ready(function () {
                 // Manejar errores de autenticación
                 const errorCode = error.code;
                 const errorMessage = error.message;
-                console.error("Error al iniciar sesión con Google:", errorCode, errorMessage);
-                alert("Error al iniciar sesión con Google: " + errorMessage);
+                console.error("Error al iniciar sesión con Facebook:", errorCode, errorMessage);
+                alert("Error al iniciar sesión con Facebook: " + errorMessage);
             })
     });
 });
