@@ -13,12 +13,13 @@ $(document).ready(function () {
     // Inicializar Firebase
     const app = firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
+    const db = firebase.firestore();
     
     // Crear una instancia del proveedor de Google
     const provider = new firebase.auth.GoogleAuthProvider();
 
     // Crear una instancia del proveedor de facebook
-    const facebookProvider = new firebase.auth.FacebookAuthProvider();
+    // const facebookProvider = new firebase.auth.FacebookAuthProvider();
 
     // Definir la URL del avatar provisional
     const defaultAvatar = "https://via.placeholder.com/100";
@@ -99,14 +100,6 @@ $(document).ready(function () {
         //lanza la ventana emergente de google
         auth.signInWithPopup(provider)
             .then(function (result) {
-                // console.log(result);
-                // Resultado de la autenticación exitoso
-                // const user = result.user;
-                // $('#userName').text(user.displayName || user.email.split('@')[0]); // Mostrar nombre de usuario
-                // $('#welcomeSection').removeClass('d-none'); // Mostrar sección de bienvenida
-                // $('#main-buttons').addClass('d-none'); // Ocultar botones principales
-                // $('#loginEmailForm').addClass('d-none'); // Ocultar formulario de login por correo si está visible
-                // $('#registerForm').addClass('d-none'); // Ocultar formulario de registro si está visible
                 console.log("Inicio de sesión con Google exitoso. ¡Bienvenido!");
             })
             .catch(function (error) {
@@ -118,7 +111,22 @@ $(document).ready(function () {
             });
     });
 
-    // **onAuthStateChanged**
+    // Manejo de eventos para iniciar sesión con Facebooko
+    // $('#loginFacebookBtn').click(function(){
+    //     auth.signInWithPopup(facebookProvider)
+    //         .then(function(result){
+    //             console.log("Inicio de sesión con Facebook. ¡Bienvenido!");
+    //         })
+    //         .catch(function(error){
+    //             // Manejar errores de autenticación
+    //             const errorCode = error.code;
+    //             const errorMessage = error.message;
+    //             console.error("Error al iniciar sesión con Facebook:", errorCode, errorMessage);
+    //             alert("Error al iniciar sesión con Facebook: " + errorMessage);
+    //         })
+    // });
+
+    // **onAuthStateChanged** --> Observador para cambios en el estado de autenticación
     auth.onAuthStateChanged(function (user) {
         if (user) {
             console.log(user);
@@ -133,6 +141,9 @@ $(document).ready(function () {
             $('#loginEmailForm').addClass('d-none');// se oculta formulario de sesion.
             $('#registerForm').addClass('d-none'); // se oculta formulario de registro.
             $('#logout').removeClass('d-none'); //Se muestra el botón de cerrar sesión.
+
+            // Cargar los datos al iniciar sesión
+            cargarDatos();
         } else {
             // Usuario no autenticado
             $('#welcomeSection').addClass('d-none');
@@ -145,17 +156,60 @@ $(document).ready(function () {
         }
     });
 
-    $('#loginFacebookBtn').click(function(){
-        auth.signInWithPopup(facebookProvider)
-            .then(function(result){
-                console.log("Inicio de sesión con Facebook. ¡Bienvenido!");
-            })
-            .catch(function(error){
-                // Manejar errores de autenticación
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                console.error("Error al iniciar sesión con Facebook:", errorCode, errorMessage);
-                alert("Error al iniciar sesión con Facebook: " + errorMessage);
-            })
+    // Manejar el registro de datos
+    $('#registroForm').submit(function (event) {
+        event.preventDefault();
+        
+        const pais = $('#pais').val();
+        const ciudad = $('#ciudad').val();
+        const habitantes = $('#habitantes').val();
+        const lenguaje = $('#lenguaje').val();
+
+        // Enviar los datos a Firestore
+        db.collection("paises").add({
+            pais: pais,
+            ciudad: ciudad,
+            habitantes: parseInt(habitantes),
+            lenguaje: lenguaje
+        })
+        .then(function (docRef) {
+            console.log("Datos registrados con ID: ", docRef.id);
+            $('#registroForm')[0].reset(); // Limpiar el formulario
+            cargarDatos(); // Recargar la lista de países
+        })
+        .catch(function (error) {
+            console.error("Error al registrar los datos: ", error);
+        });
     });
+
+    // Función para cargar los datos registrados
+    function cargarDatos() {
+        const tablaPaises = $('#tablaPaises');
+        const sinDatos = $('#sinDatos');
+
+        // Limpiar tabla
+        tablaPaises.empty();
+
+        // Leer los datos de Firestore
+        db.collection("paises").get().then(function (querySnapshot) {
+            if (querySnapshot.empty) {
+                sinDatos.show(); // Mostrar mensaje si no hay datos
+            } else {
+                sinDatos.hide(); // Ocultar mensaje si hay datos
+                querySnapshot.forEach(function (doc) {
+                    const pais = doc.data();
+                    tablaPaises.append(`
+                        <tr>
+                            <td>${pais.pais}</td>
+                            <td>${pais.ciudad}</td>
+                            <td>${pais.habitantes}</td>
+                            <td>${pais.lenguaje}</td>
+                        </tr>
+                    `);
+                });
+            }
+        }).catch(function (error) {
+            console.error("Error al obtener los datos: ", error);
+        });
+    }
 });

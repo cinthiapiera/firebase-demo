@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -16,58 +16,63 @@
     <title>Firebase Demo</title>
   </head>
   <body>
+
     <!-- Navbar -->
     <nav class="navbar navbar-light bg-light">
       <div class="container-fluid">
-        <a class="navbar-brand">Firebase Demo</a>
+        <a class="navbar-brand" href="#" aria-label="Firebase Demo">Firebase Demo</a>
         <div class="d-flex">
-          <button id="logout" class="btn btn-outline-success d-none">Salir</button>
+          <button id="logout" class="btn btn-outline-success d-none" aria-label="Cerrar sesión">Salir</button>
         </div>
       </div>
     </nav>
 
     <div class="container mt-5">
       <h1 class="display-4 text-center">Iniciar Sesión</h1>
+
+      <!-- Área para mensajes de error (accesibilidad) -->
+      <div id="error-message" class="alert alert-danger d-none" role="alert" aria-live="assertive"></div>
       
       <!-- Botones principales -->
       <div id="main-buttons" class="text-center">
-        <button id="loginEmailBtn" class="btn btn-primary">Iniciar Sesión con Correo</button>
-        <button id="loginGoogleBtn" class="btn btn-danger">Iniciar Sesión con Google</button>
-        <button id="loginFacebookBtn" class="btn btn-success">Iniciar Sesión con Facebook</button>
-        <button id="showRegisterForm" class="btn btn-link mt-3">¿No tienes cuenta? Regístrate aquí</button>
+        <button id="loginEmailBtn" class="btn btn-primary" aria-label="Iniciar Sesión con Correo">Iniciar Sesión con Correo</button>
+        <button id="loginGoogleBtn" class="btn btn-danger" aria-label="Iniciar Sesión con Google">Iniciar Sesión con Google</button>
+        <button id="loginFacebookBtn" class="btn btn-success" aria-label="Iniciar Sesión con Facebook">Iniciar Sesión con Facebook</button>
+        <button id="showRegisterForm" class="btn btn-link mt-3" aria-label="Registrarse">¿No tienes cuenta? Regístrate aquí</button>
       </div>
       
       <!-- Formulario de Login por Correo -->
       <div id="loginEmailForm" class="mt-5 d-none">
         <h3>Iniciar sesión</h3>
-        <form id="loginForm">
+        <form id="loginForm" aria-labelledby="loginFormHeading">
           <div class="mb-3">
-            <label for="email" class="form-label">Correo Electrónico</label>
-            <input type="email" id="loginEmail" class="form-control" placeholder="Ingresa tu correo">
+            <label for="loginEmail" class="form-label">Correo Electrónico</label>
+            <input type="email" id="loginEmail" class="form-control" placeholder="Ingresa tu correo" required aria-required="true">
           </div>
           <div class="mb-3">
-            <label for="password" class="form-label">Contraseña</label>
-            <input type="password" id="loginPassword" class="form-control" placeholder="Ingresa tu contraseña">
+            <label for="loginPassword" class="form-label">Contraseña</label>
+            <input type="password" id="loginPassword" class="form-control" placeholder="Ingresa tu contraseña" required aria-required="true">
           </div>
-          <button type="submit" class="btn btn-primary">Ingresar</button>
-          <button type="button" id="backToMain1" class="btn btn-secondary">Volver</button>
+          <button type="submit" class="btn btn-primary" aria-label="Ingresar">Ingresar</button>
+          <button type="button" id="backToMain1" class="btn btn-secondary" aria-label="Volver al menú principal">Volver</button>
+          <a href="#" id="forgotPassword" class="btn btn-link">¿Olvidaste tu contraseña?</a>
         </form>
       </div>
   
       <!-- Formulario de Registro -->
       <div id="registerForm" class="mt-5 d-none">
         <h3>Registrarse</h3>
-        <form id="registerNewUserForm">
+        <form id="registerNewUserForm" aria-labelledby="registerFormHeading">
           <div class="mb-3">
             <label for="registerEmail" class="form-label">Correo Electrónico</label>
-            <input type="email" id="registerEmail" class="form-control" placeholder="Ingresa tu correo">
+            <input type="email" id="registerEmail" class="form-control" placeholder="Ingresa tu correo" required aria-required="true">
           </div>
           <div class="mb-3">
             <label for="registerPassword" class="form-label">Contraseña</label>
-            <input type="password" id="registerPassword" class="form-control" placeholder="Ingresa tu contraseña">
+            <input type="password" id="registerPassword" class="form-control" placeholder="Ingresa tu contraseña" required aria-required="true">
           </div>
-          <button type="submit" class="btn btn-primary">Registrar</button>
-          <button type="button" id="backToMain2" class="btn btn-secondary">Volver</button>
+          <button type="submit" class="btn btn-primary" aria-label="Registrar">Registrar</button>
+          <button type="button" id="backToMain2" class="btn btn-secondary" aria-label="Volver al menú principal">Volver</button>
         </form>
       </div>
       
@@ -75,9 +80,50 @@
 
     <!-- Sección de Bienvenida -->
     <div id="welcomeSection" class="mt-5 d-none text-center">
-        <img id="userAvatar" src="https://via.placeholder.com/100" alt="Avatar" class="rounded-circle mb-3" width="100" height="100">
+        <img id="userAvatar" src="https://via.placeholder.com/100" alt="Avatar de usuario" class="rounded-circle mb-3" width="100" height="100">
         <h2>¡Bienvenido, <span id="userName"></span>!</h2>
         <p>Has iniciado sesión exitosamente.</p>
+
+        <div id="registroDatos" class="mt-5">
+          <h3>Registro de Paises</h3>
+          <form id="registroForm">
+            <div class="mb-3">
+              <label for="pais" class="form-label">País</label>
+              <input type="text" id="pais" class="form-control" placeholder="Ingresa el país" required>
+            </div>
+            <div class="mb-3">
+              <label for="ciudad" class="form-label">Ciudad</label>
+              <input type="text" id="ciudad" class="form-control" placeholder="Ingresa la ciudad" required>
+            </div>
+            <div class="mb-3">
+              <label for="habitantes" class="form-label">Habitantes</label>
+              <input type="number" id="habitantes" class="form-control" placeholder="Número de habitantes" required>
+            </div>
+            <div class="mb-3">
+              <label for="lenguaje" class="form-label">Lenguaje</label>
+              <input type="text" id="lenguaje" class="form-control" placeholder="Lenguaje principal" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Registrar</button>
+          </form>
+        </div>
+        
+        <div id="listaPaises" class="mt-5">
+          <h3>Lista de Paises Registrados</h3>
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>País</th>
+                <th>Ciudad</th>
+                <th>Habitantes</th>
+                <th>Lenguaje</th>
+              </tr>
+            </thead>
+            <tbody id="tablaPaises">
+              <!-- Aquí se mostrarán los datos -->
+            </tbody>
+          </table>
+          <p id="sinDatos" class="text-muted">No hay datos registrados, por favor registre un país.</p>
+        </div>
     </div>
 
     <!-- CDN Bootstrap js -->
@@ -92,6 +138,8 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <!-- CDN Firebase Auth -->
     <script  src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <!-- CDN Firebase database -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <!-- js personalizado -->
     <script src="js/script.js"></script>
   </body>
