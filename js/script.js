@@ -111,7 +111,7 @@ $(document).ready(function () {
             });
     });
 
-    // Manejo de eventos para iniciar sesión con Facebooko
+    // Manejo de eventos para iniciar sesión con Facebook
     // $('#loginFacebookBtn').click(function(){
     //     auth.signInWithPopup(facebookProvider)
     //         .then(function(result){
@@ -159,27 +159,56 @@ $(document).ready(function () {
     // Manejar el registro de datos
     $('#registroForm').submit(function (event) {
         event.preventDefault();
-        
+        console.log("Formulario de registro enviado"); // Agregar esta línea
         const pais = $('#pais').val();
         const ciudad = $('#ciudad').val();
         const habitantes = $('#habitantes').val();
         const lenguaje = $('#lenguaje').val();
+        const docId = $(this).data('docId'); // Obtener el ID del documento desde el formulario
 
-        // Enviar los datos a Firestore
-        db.collection("paises").add({
-            pais: pais,
-            ciudad: ciudad,
-            habitantes: parseInt(habitantes),
-            lenguaje: lenguaje
-        })
-        .then(function (docRef) {
-            console.log("Datos registrados con ID: ", docRef.id);
-            $('#registroForm')[0].reset(); // Limpiar el formulario
-            cargarDatos(); // Recargar la lista de países
-        })
-        .catch(function (error) {
-            console.error("Error al registrar los datos: ", error);
-        });
+        // Validar que los campos no estén vacíos
+        if (!pais || !ciudad || !habitantes || !lenguaje) {
+            alert("Por favor completa todos los campos.");
+            return;
+        }
+        
+        if (docId) {
+            // Actualizar el documento existente
+            db.collection("paises").doc(docId).update({
+                pais: pais,
+                ciudad: ciudad,
+                habitantes: parseInt(habitantes),
+                lenguaje: lenguaje
+            })
+            .then(function () {
+                console.log("Datos actualizados correctamente");
+                $('#registroForm')[0].reset(); // Limpiar el formulario
+                $(this).removeData('docId'); // Limpiar el ID guardado
+                $('#btn-actualizar').addClass('d-none');
+                $('#btn-registrar').removeClass('d-none');
+                cargarDatos(); // Recargar la lista de países
+            })
+            .catch(function (error) {
+                console.error("Error al actualizar los datos: ", error);
+            });
+        }else{
+            // Enviar los datos a Firestore
+            db.collection("paises").add({
+                pais: pais,
+                ciudad: ciudad,
+                habitantes: parseInt(habitantes),
+                lenguaje: lenguaje
+            })
+            .then(function (docRef) {
+                console.log("Datos registrados con ID: ", docRef.id);
+                // $('#registroForm').trigger('reset'); ambas sentencias son iguales
+                $('#registroForm')[0].reset(); // Limpiar el formulario
+                cargarDatos(); // Recargar la lista de países
+            })
+            .catch(function (error) {
+                console.error("Error al registrar los datos: ", error);
+            });
+        }
     });
 
     // Función para cargar los datos registrados
@@ -199,11 +228,15 @@ $(document).ready(function () {
                 querySnapshot.forEach(function (doc) {
                     const pais = doc.data();
                     tablaPaises.append(`
-                        <tr>
+                        <tr data-id="${doc.id}">
                             <td>${pais.pais}</td>
                             <td>${pais.ciudad}</td>
                             <td>${pais.habitantes}</td>
                             <td>${pais.lenguaje}</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning edit-btn" aria-label="Editar registro">Editar</button>
+                                <button class="btn btn-sm btn-danger delete-btn" aria-label="Eliminar registro">Eliminar</button>
+                            </td>
                         </tr>
                     `);
                 });
@@ -212,4 +245,89 @@ $(document).ready(function () {
             console.error("Error al obtener los datos: ", error);
         });
     }
+
+    // Manejar la apertura del modal para editar un registro
+    $(document).on('click', '.edit-btn', function () {
+        const tr = $(this).closest('tr');
+        const docId = tr.data('id');
+
+        // Obtener los datos actuales del registro
+        db.collection("paises").doc(docId).get()
+            .then(function (doc) {
+                if (doc.exists) {
+                    const data = doc.data();
+                    $('#editDocId').val(doc.id);
+                    $('#editPais').val(data.pais);
+                    $('#editCiudad').val(data.ciudad);
+                    $('#editHabitantes').val(data.habitantes);
+                    $('#editLenguaje').val(data.lenguaje);
+                    
+                    // Mostrar el modal
+                    const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+                    editModal.show();
+                } else {
+                    console.log("No se encontró el documento!");
+                    alert("No se encontró el registro.");
+                }
+            })
+            .catch(function (error) {
+                console.error("Error al obtener el documento: ", error);
+                alert("Error al obtener el registro: " + error.message);
+            });
+    });
+
+    // Manejar el envío del formulario de edición
+    $('#editForm').submit(function (event) {
+        event.preventDefault();
+
+        const docId = $('#editDocId').val();
+        const pais = $('#editPais').val();
+        const ciudad = $('#editCiudad').val();
+        const habitantes = $('#editHabitantes').val();
+        const lenguaje = $('#editLenguaje').val();
+
+        // Actualizar el documento en Firestore
+        db.collection("paises").doc(docId).update({
+            pais: pais,
+            ciudad: ciudad,
+            habitantes: parseInt(habitantes),
+            lenguaje: lenguaje
+        })
+        .then(function () {
+            console.log("Registro actualizado con ID: ", docId);
+            // Cerrar el modal
+            const editModalEl = document.getElementById('editModal');
+            const editModal = bootstrap.Modal.getInstance(editModalEl);
+            editModal.hide();
+            // Recargar los datos
+            cargarDatos();
+        })
+        .catch(function (error) {
+            console.error("Error al actualizar el registro: ", error);
+            alert("Error al actualizar el registro: " + error.message);
+        });
+    });
+
+    // Manejar la eliminación de un registro
+    $(document).on('click', '.delete-btn', function () {
+        const tr = $(this).closest('tr');
+        const docId = tr.data('id');
+
+        if (confirm("¿Estás seguro de que deseas eliminar este registro?")) {
+            db.collection("paises").doc(docId).delete()
+                .then(function () {
+                    console.log("Registro eliminado con ID: ", docId);
+                    tr.remove(); // Eliminar la fila de la tabla
+                    // Verificar si la tabla está vacía
+                    if ($('#tablaPaises tr').length === 0) {
+                        $('#sinDatos').show();
+                    }
+                })
+                .catch(function (error) {
+                    console.error("Error al eliminar el registro: ", error);
+                    alert("Error al eliminar el registro: " + error.message);
+                });
+        }
+    });
+
 });

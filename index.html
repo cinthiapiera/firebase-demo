@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- CDN Bootstrap -->
+         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -103,7 +104,8 @@
               <label for="lenguaje" class="form-label">Lenguaje</label>
               <input type="text" id="lenguaje" class="form-control" placeholder="Lenguaje principal" required>
             </div>
-            <button type="submit" class="btn btn-primary">Registrar</button>
+            <button type="submit" class="btn btn-primary" id="btn-registrar">Registrar</button>
+            <button type="submit" class="btn btn-warning d-none" id="btn-actualizar">Actualizar</button>
           </form>
         </div>
         
@@ -116,6 +118,7 @@
                 <th>Ciudad</th>
                 <th>Habitantes</th>
                 <th>Lenguaje</th>
+                <th>Acciones</th> <!-- Nueva columna para acciones -->
               </tr>
             </thead>
             <tbody id="tablaPaises">
@@ -125,6 +128,44 @@
           <p id="sinDatos" class="text-muted">No hay datos registrados, por favor registre un país.</p>
         </div>
     </div>
+
+    <!-- Modal para Editar País -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <form id="editForm">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="editModalLabel">Editar País</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+              <input type="hidden" id="editDocId">
+              <div class="mb-3">
+                <label for="editPais" class="form-label">País</label>
+                <input type="text" id="editPais" class="form-control" required>
+              </div>
+              <div class="mb-3">
+                <label for="editCiudad" class="form-label">Ciudad</label>
+                <input type="text" id="editCiudad" class="form-control" required>
+              </div>
+              <div class="mb-3">
+                <label for="editHabitantes" class="form-label">Habitantes</label>
+                <input type="number" id="editHabitantes" class="form-control" required>
+              </div>
+              <div class="mb-3">
+                <label for="editLenguaje" class="form-label">Lenguaje</label>
+                <input type="text" id="editLenguaje" class="form-control" required>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Cancelar">Cancelar</button>
+              <button type="submit" class="btn btn-primary" aria-label="Guardar cambios">Guardar Cambios</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
 
     <!-- CDN Bootstrap js -->
     <script
