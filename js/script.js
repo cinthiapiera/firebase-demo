@@ -164,7 +164,6 @@ $(document).ready(function () {
         const ciudad = $('#ciudad').val();
         const habitantes = $('#habitantes').val();
         const lenguaje = $('#lenguaje').val();
-        const docId = $(this).data('docId'); // Obtener el ID del documento desde el formulario
 
         // Validar que los campos no estén vacíos
         if (!pais || !ciudad || !habitantes || !lenguaje) {
@@ -172,43 +171,22 @@ $(document).ready(function () {
             return;
         }
         
-        if (docId) {
-            // Actualizar el documento existente
-            db.collection("paises").doc(docId).update({
-                pais: pais,
-                ciudad: ciudad,
-                habitantes: parseInt(habitantes),
-                lenguaje: lenguaje
-            })
-            .then(function () {
-                console.log("Datos actualizados correctamente");
-                $('#registroForm')[0].reset(); // Limpiar el formulario
-                $(this).removeData('docId'); // Limpiar el ID guardado
-                $('#btn-actualizar').addClass('d-none');
-                $('#btn-registrar').removeClass('d-none');
-                cargarDatos(); // Recargar la lista de países
-            })
-            .catch(function (error) {
-                console.error("Error al actualizar los datos: ", error);
-            });
-        }else{
-            // Enviar los datos a Firestore
-            db.collection("paises").add({
-                pais: pais,
-                ciudad: ciudad,
-                habitantes: parseInt(habitantes),
-                lenguaje: lenguaje
-            })
-            .then(function (docRef) {
-                console.log("Datos registrados con ID: ", docRef.id);
-                // $('#registroForm').trigger('reset'); ambas sentencias son iguales
-                $('#registroForm')[0].reset(); // Limpiar el formulario
-                cargarDatos(); // Recargar la lista de países
-            })
-            .catch(function (error) {
-                console.error("Error al registrar los datos: ", error);
-            });
-        }
+        db.collection("paises").add({
+            pais: pais,
+            ciudad: ciudad,
+            habitantes: parseInt(habitantes),
+            lenguaje: lenguaje
+        })
+        .then(function (docRef) {
+            console.log("Datos registrados con ID: ", docRef.id);
+            // $('#registroForm').trigger('reset'); ambas sentencias son iguales
+            $('#registroForm')[0].reset(); // Limpiar el formulario
+            cargarDatos(); // Recargar la lista de países
+        })
+        .catch(function (error) {
+            console.error("Error al registrar los datos: ", error);
+        });
+        
     });
 
     // Función para cargar los datos registrados
